@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task 2 - Day 15</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to bottom right, #5cb1a6, #6dc1b5);
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 860px;
+      margin: 40px auto;
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+    }
+    h2 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    .section-title {
+      font-size: 20px;
+      margin-top: 30px;
+      margin-bottom: 12px;
+      color: #34495e;
+      border-bottom: 2px solid #4caf91;
+      padding-bottom: 4px;
+    }
+    .question {
+      margin-bottom: 25px;
+    }
+    .english {
+      font-size: 16px;
+      margin-bottom: 6px;
+      line-height: 1.6;
+    }
+    .translation {
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 6px;
+    }
+    input[type="text"] {
+      width: 140px;
+      padding: 6px;
+      margin: 0 3px;
+      font-size: 15px;
+      border: 2px solid #ccc;
+      border-radius: 6px;
+    }
+    .check-btn {
+      margin-top: 6px;
+      background: #4caf91;
+      color: white;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .feedback {
+      margin-top: 6px;
+      font-weight: bold;
+    }
+    .correct { color: green; }
+    .incorrect { color: red; }
+    @media (max-width: 600px) {
+      input[type="text"] {
+        width: 100px;
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h2>Task 2 - Day 15</h2>
+
+  <div class="section-title">一. 句子填空（Environment）</div>
+
+  <div id="q1" class="question"></div>
+  <div id="q2" class="question"></div>
+</div>
+
+<script>
+  const sentences = [
+    {
+      id: "s1",
+      text: "Global warming is caused by many factors. (1). Many developing countries are becoming industrialized. (2). The number of cars on our streets is growing. (3). Cheap air travel is allowing more people to fly.",
+      translation: "全球变暖由多种因素造成：(1) 发展中国家工业化；(2) 汽车数量增加；(3) 廉价航空使更多人选择飞行。",
+      containerId: "q1"
+    },
+    {
+      id: "s2",
+      text: "Global warming will have a significant impact on our planet. Rising temperature will cause melting of the polar ice caps, and then sea levels will rise. At the same time, we can expect more extreme weather conditions; for example, flooding and drought may become more common.",
+      translation: "全球变暖将对地球产生重大的影响。温度上升会导致极地冰冠融化，从而引发海平面上升。与此同时，极端天气如洪水和干旱也会更常见。",
+      containerId: "q2"
+    }
+  ];
+
+  function getRandomIndexes(array, min = 5, max = 7) {
+    const count = Math.min(Math.floor(Math.random() * (max - min + 1)) + min, array.length);
+    const set = new Set();
+    while (set.size < count) {
+      const i = Math.floor(Math.random() * array.length);
+      const word = array[i].replace(/[.,()"]/g, '');
+      if (word.length > 2 && !word.includes("'")) set.add(i);
+    }
+    return Array.from(set);
+  }
+
+  function renderSentence({ id, text, translation, containerId }) {
+    const words = text.split(" ");
+    const blanks = getRandomIndexes(words);
+    const answers = {};
+    const html = words.map((word, i) => {
+      const clean = word.replace(/[.,()"]/g, "");
+      const punct = word.match(/[.,()"]$/) ? word.slice(-1) : "";
+      if (blanks.includes(i)) {
+        const inputId = `${id}_${i}`;
+        answers[inputId] = clean.toLowerCase();
+        return `<input type="text" id="${inputId}" placeholder="...">${punct}`;
+      }
+      return word;
+    }).join(" ");
+    document.getElementById(containerId).innerHTML = `
+      <div class="english">${html}</div>
+      <div class="translation">${translation}</div>
+      <button class="check-btn" onclick='checkSentence("${id}", ${JSON.stringify(answers)})'>Check</button>
+      <div class="feedback" id="fb_${id}"></div>
+    `;
+  }
+
+  function checkSentence(id, answers) {
+    const feedback = document.getElementById("fb_" + id);
+    let correct = true;
+    for (const [inputId, expected] of Object.entries(answers)) {
+      const val = document.getElementById(inputId).value.trim().toLowerCase();
+      if (val !== expected) correct = false;
+    }
+    feedback.innerHTML = correct
+      ? "<span class='correct'>✔ 正确！</span>"
+      : `<span class='incorrect'>✘ 有错误</span> 正确答案：${Object.values(answers).join(" / ")}`;
+  }
+
+  // 渲染所有句子填空
+  sentences.forEach(renderSentence);
+</script>
+</body>
+</html>
